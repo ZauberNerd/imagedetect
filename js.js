@@ -80,12 +80,15 @@ var findBall = function() {
 	};
 };
 
+var histogramThreshold = function(v) {
+	return v > 5;
+};
 
 var img = new Image();
 img.onload = function() {
-	var scale = 0.5;
-	var width = this.width * scale;
-	var height = this.height * scale;
+	var scale = 1;
+	var width = Math.round(this.width * scale);
+	var height = Math.round(this.height * scale);
 
 
 	canvas.width = width;
@@ -96,33 +99,94 @@ img.onload = function() {
 	ctx.drawImage(this, 0, 0, width, height);
 	var imageData = ctx.getImageData(0, 0, width, height);
 
+
 	var threshold = 60;
 
 	var diff;
 	var value;
-	for (
-		i = (imageData.width * imageData.height * 4) - 1 - 3;
-		i >= 0;
-		i -= 4
-	) {
-		// get red layer and subtract gray layer
-		diff = Math.min(Math.max(imageData.data[i] - ((imageData.data[i] + imageData.data[i+1] + imageData.data[i+2]) / 3), 0), 255);
 
-		// binary image with threshold
-		value = +(diff > threshold) * 255;
+	var x,y,i;
+	var histogramX = {};
+	var histogramY = {};
 
-		imageData.data[i    ] = value;
-		imageData.data[i + 1] = value;
-		imageData.data[i + 2] = value;
+	for (y = height -1; y >= 0; --y) {
+		for (x = width -1; x >= 0; --x) {
+			i = (x + y * width) * 4;
+
+			diff = imageData.data[i] - ((imageData.data[i] + imageData.data[i+1] + imageData.data[i+2]) / 3);
+
+			value = +(diff > threshold) * 255;
+
+			if (value) {
+				histogramX[x] = (histogramX[x] || 0) + 1;
+				histogramY[y] = (histogramY[y] || 0) + 1;
+			}
+		}
 	}
 
-	ctx.putImageData(imageData, 0, 0);
+	// ctx.putImageData(imageData, 0, 0);
 
-	var pos = findBall(imageData.data);
-	ctx.strokeStyle = 'red';
+	var threshold2 = 4;
+
+	var cleanHX = {};
+	var cleanHY = {};
+
+	var Xfirst, Xlast;
+	var Yfirst, Ylast;
+
+	var p;
+
+	for (p in histogramX) {
+		if (histogramX[p] >= threshold2) {
+			if (!Xfirst) {
+				Xfirst = p;
+			}
+			Xlast = p;
+		}
+	}
+
+	for (p in histogramY) {
+		if (histogramY[p] >= threshold2) {
+			if (!Yfirst) {
+				Yfirst = p;
+			}
+			Ylast = p;
+		}
+	}
+
+	ctx.strokeStyle = 'blue';
 	ctx.lineWidth = 1;
-	ctx.strokeRect(pos.x - 5, pos.y - 5, 10, 10);
 
+	ctx.strokeRect(Xfirst, Yfirst, Xlast - Xfirst, Ylast - Yfirst);
+
+	// Xfirst /= scale;
+	// Xlast /= scale;
+	// Yfirst /= scale;
+	// Ylast /= scale;
+
+
+
+
+	console.log(Xfirst, Xlast);
+	console.log(Yfirst, Ylast);
+
+
+	// for (y = height -1; y >= 0; --y) {
+	// 	for (x = width -1; x >= 0; --x) {
+	// 		if (histogramX[x] >= threshold2 && histogramY[y] >= threshold2) {
+	// 			i = (x + y * width) * 4;
+	// 			newImageData.data[i    ] = 255;
+	// 			newImageData.data[i + 1] = 0;
+	// 			newImageData.data[i + 2] = 255;
+	// 			newImageData.data[i + 3] = 255;
+	// 		}
+	// 	}
+	// }
+
+
+
+
+	// ctx.putImageData(newImageData, 0, 0);
 
 	// blob statistics analysis
 
