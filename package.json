@@ -1,0 +1,22 @@
+{
+  "name": "imagedetect",
+  "version": "0.0.0",
+  "description": "",
+  "main": "nodecanvas.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ZauberNerd/imagedetect.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ZauberNerd/imagedetect/issues"
+  },
+  "homepage": "https://github.com/ZauberNerd/imagedetect",
+  "dependencies": {
+    "canvas": "~1.1.3"
+  }
+}
